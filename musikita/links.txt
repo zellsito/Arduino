@@ -1,0 +1,3 @@
+https://github.com/creatividadcodificada/ProyectosArduino/blob/master/musica_con_tonos_Arduino.ino
+https://github.com/creatividadcodificada/ProyectosArduino/blob/master/sirenaAmbulacia.ino
+https://www.youtube.com/watch?v=h36iOaqKcwM&ab_channel=AlgoBack
