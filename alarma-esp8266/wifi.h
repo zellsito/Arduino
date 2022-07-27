@@ -6,7 +6,7 @@ String password = "kayasindi";
 byte cont = 0;
 byte max_intentos = 50;
 
-void conectarWifi() {
+void initWifi() {
   WiFi.begin(ssid, password);
   Serial.print("Conectando...");
   while (WiFi.status() != WL_CONNECTED and cont < max_intentos) { //Cuenta hasta 50 si no se puede conectar lo cancela

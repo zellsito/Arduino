@@ -1,42 +1,49 @@
-#include <SPI.h>      // incluye libreria bus SPI
-#include <MFRC522.h>      // incluye libreria especifica para MFRC522
+#include <SPI.h>
+#include <MFRC522.h>
 
-#define RST_PIN  D0      // constante para referenciar pin de reset
-#define SS_PIN  D8      // constante para referenciar pin de slave select
+#define SS_PIN D8
+#define RST_PIN D0
 
-byte LecturaUID[4];
-byte usuario[4]= {0x53, 0x01, 0xE3, 0xA1};
+MFRC522 rfid(SS_PIN, RST_PIN);
+byte luciano[4] = {0x53, 0x01, 0xE3, 0xA1};
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // crea objeto mfrc522 enviando pines de slave select y reset
+void printHex(byte *buffer) {
+ for (byte i = 0; i < 4; i++) {
+   Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+   Serial.print(buffer[i], HEX);
+ }
+}
+
+boolean esIgual(byte *id1, byte *id2){
+  return (id1[0] == id2[0] &&
+     id1[1] == id2[1] &&
+     id1[2] == id2[2] &&
+     id1[3] == id2[3] );
+}
 
 void iniciarRfid() {
-  SPI.begin();        // inicializa bus SPI
-  mfrc522.PCD_Init();     // inicializa modulo lector
+ SPI.begin(); // Init SPI bus
+ rfid.PCD_Init(); // Init MFRC522
+ Serial.print(F("Reader: "));
+ rfid.PCD_DumpVersionToSerial();
 }
 
-boolean comparaUID()
-{
-  boolean esIgual = true;
-  for (byte i=0; i < mfrc522.uid.size; i++){
-    if (LecturaUID[i] != usuario[i]){
-      esIgual = false;
-    }
-  }
-  return esIgual;
-}
+String leerRfid() {
+ if ( ! rfid.PICC_IsNewCardPresent()){
+   return "No hay tarjeta presente";
+ }
+   
+ if ( ! rfid.PICC_ReadCardSerial()){
+   return "No se pudo leer tarjeta";
+ }
+ 
+ if (esIgual(luciano, rfid.uid.uidByte)){
+   printHex(luciano);
+   return "Bienvenido Luciano";
+ }
 
-boolean leerRfid()
-{
-  if (!mfrc522.PICC_IsNewCardPresent()
-  || !mfrc522.PICC_ReadCardSerial()){
-    return false;
-  }
-  for (byte i = 0; i < mfrc522.uid.size; i++) {
-    LecturaUID[i]=mfrc522.uid.uidByte[i];
-  }
-  for (byte i = 0; i < mfrc522.uid.size; i++) {
-    Serial.println(LecturaUID[i]);
-  }
-  mfrc522.PICC_HaltA();
-  return comparaUID();
+ return "Acceso denegado";
+
+ rfid.PICC_HaltA();
+ rfid.PCD_StopCrypto1();
 }
